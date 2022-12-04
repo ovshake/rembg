@@ -11,6 +11,7 @@ import pooch
 from .session_base import BaseSession
 from .session_cloth import ClothSession
 from .session_simple import SimpleSession
+from huggingface_hub import hf_hub_download
 
 
 def new_session(model_name: str = "u2net") -> BaseSession:
@@ -40,21 +41,11 @@ def new_session(model_name: str = "u2net") -> BaseSession:
         )
         session_class = SimpleSession
 
-    u2net_home = os.getenv(
-        "U2NET_HOME", os.path.join(os.getenv("XDG_DATA_HOME", "~"), ".u2net")
-    )
+    elif model_name == "u2net":
+        full_path = hf_hub_download(repo_id="maiti/cloth-segmentation", filename="u2net.onnx")
 
-    fname = f"{model_name}.onnx"
-    path = Path(u2net_home).expanduser()
-    full_path = Path(u2net_home).expanduser() / fname
 
-    pooch.retrieve(
-        url,
-        f"md5:{md5}",
-        fname=fname,
-        path=Path(u2net_home).expanduser(),
-        progressbar=True,
-    )
+
 
     sess_opts = ort.SessionOptions()
 
